@@ -43,6 +43,10 @@ XenDeviceInitialize(
     IN KDEFERRED_ROUTINE DpcCallback,
     IN ULONG DeviceId);
 
+VOID
+XenDeviceDestroy(
+    IN PXEN_INTERFACE Xen);
+
 NTSTATUS
 __drv_requiresIRQL(PASSIVE_LEVEL)
 XenDeviceConnectBackend(

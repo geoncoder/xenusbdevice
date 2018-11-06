@@ -468,7 +468,9 @@ FdoEvtDeviceContextCleanup (
     //
     if (fdoContext->Xen)
     {
+        XenDeviceDestroy(fdoContext->Xen);
         DeallocateXenInterface(fdoContext->Xen);
+        fdoContext->Xen = NULL;
     }
     if (fdoContext->CompatIds)
     {
@@ -696,6 +698,7 @@ XenConfigure(
 
     if (fdoContext->Xen)
     {
+        XenDeviceDestroy(fdoContext->Xen);
         DeallocateXenInterface(fdoContext->Xen);
     }
 

@@ -609,7 +609,7 @@ XenReleaseInterfaces(
     Trace("successfully released xenbus suspend interface\n");
 }
 
-static VOID
+VOID
 XenDeviceDestroy(
     IN PXEN_INTERFACE Xen
 )
