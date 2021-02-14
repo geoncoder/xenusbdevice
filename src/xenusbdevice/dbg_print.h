@@ -104,7 +104,7 @@ __Trace(
 #pragma prefast(suppress:6001) // Using uninitialized memory
     vDbgPrintExWithPrefix(Prefix,
                           DPFLTR_IHVDRIVER_ID,
-                          DPFLTR_TRACE_LEVEL,
+                          DPFLTR_ERROR_LEVEL,
                           Format,
                           Arguments);
     va_end(Arguments);
@@ -142,7 +142,7 @@ __Info(
 #pragma prefast(suppress:6001) // Using uninitialized memory
     vDbgPrintExWithPrefix(Prefix,
                           DPFLTR_IHVDRIVER_ID,
-                          DPFLTR_INFO_LEVEL,
+                          DPFLTR_ERROR_LEVEL,
                           Format,
                           Arguments);
     va_end(Arguments);
