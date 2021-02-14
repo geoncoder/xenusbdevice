@@ -1251,8 +1251,8 @@ VOID
 XenDeviceDisconnectBackend(
     IN PXEN_INTERFACE Xen)
 {
-    NTSTATUS                        status;
-    XenbusState                     bestate;
+    NTSTATUS status;
+    XenbusState bestate;
     KEVENT                          Event;
     PXENBUS_STORE_WATCH             Watch;
 
@@ -1263,8 +1263,6 @@ XenDeviceDisconnectBackend(
         TraceError("shutting down an adapter %s which wasn't properly created?\n", Xen->FrontendPath);
         return;
     }
-
-    KeInitializeEvent(&Event, NotificationEvent, FALSE);
 
     status = XENBUS_STORE(WatchAdd,
                           &Xen->StoreInterface,
@@ -1281,8 +1279,13 @@ XenDeviceDisconnectBackend(
 
     Trace("Added xenstore watch on: %s/state\n", Xen->BackendPath);
 
+    // Wait for the backend to stabilise before we close it
+    // XXX: That is, if it's still initialising, wait until it exits that state?
+    do {
+        FrontendWaitForBackendXenbusStateChange(Xen, &Event, &bestate);
+    } while (bestate != XenbusStateInitialising && bestate != XenbusStateUnknown);
+
     // Now declare frontend as closing & wait for backend to do the same
-    bestate = XenbusStateUnknown;
     do {
         status = XENBUS_STORE(Printf,
                               &Xen->StoreInterface,
