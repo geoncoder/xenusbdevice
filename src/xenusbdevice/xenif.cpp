@@ -1264,6 +1264,8 @@ XenDeviceDisconnectBackend(
         return;
     }
 
+    KeInitializeEvent(&Event, NotificationEvent, FALSE);
+
     status = XENBUS_STORE(WatchAdd,
                           &Xen->StoreInterface,
                           Xen->BackendPath,
