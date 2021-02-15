@@ -109,20 +109,11 @@ DriverEntry(
     gDriverName = name;
     gVistaOrLater = RtlIsNtDdiVersionAvailable(NTDDI_VISTA);
 
-#ifdef ALPHA_DBG
     gDebugLevel = TRACE_LEVEL_INFORMATION;
     gDebugFlag = TRACE_DRIVER|TRACE_DEVICE|TRACE_QUEUE|TRACE_URB|TRACE_ISR|TRACE_DPC;
-#else
-    gDebugLevel = TRACE_LEVEL_WARNING;
-    gDebugFlag = TRACE_DRIVER|TRACE_DEVICE|TRACE_QUEUE|TRACE_URB;
-#endif
     GetDebugSettings(RegistryPath);
 
-#if DBG
     CHAR * buildType = "Debug";
-#else
-    CHAR * buildType = "Release";
-#endif
 
     Info("XENUSBDEVICE (%s) %d.%d.%d (%d) (%s - %s) (%02d.%02d.%04d)\n",
          buildType,
