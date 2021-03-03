@@ -1199,45 +1199,34 @@ FdoEvtTimerFunc(
     _In_ WDFTIMER Timer
 )
 {
-    ASSERT3U(KeGetCurrentIrql(), == , DISPATCH_LEVEL);
+    __try {
+        ASSERT3U(KeGetCurrentIrql(), == , DISPATCH_LEVEL);
 
-    PUSB_FDO_CONTEXT fdoContext = DeviceGetFdoContext(WdfTimerGetParentObject(Timer));
+        PUSB_FDO_CONTEXT fdoContext = DeviceGetFdoContext(WdfTimerGetParentObject(Timer));
 
-    // restart the timer.
-    WdfTimerStart(Timer, WDF_REL_TIMEOUT_IN_SEC(1));
+        AcquireFdoLock(fdoContext);
 
-#if 0
-    BOOLEAN operational = XenCheckOperationalState(fdoContext->Xen);
-
-    AcquireFdoLock(fdoContext);
-    if (!fdoContext->DeviceUnplugged)
-    {
-        if (operational)
+        if (!fdoContext->DeviceUnplugged)
         {
-            // restart the timer.
-            WdfTimerStart(Timer, WDF_REL_TIMEOUT_IN_SEC(1));
+            if (!XenCheckOperationalState(fdoContext->Xen)) {
+                TraceEvents(TRACE_LEVEL_WARNING, TRACE_DEVICE,
+                    __FUNCTION__": %s Device %p unplug detected by watchdog\n",
+                    fdoContext->FrontEndPath,
+                    fdoContext->WdfDevice);
+                ReleaseFdoLock(fdoContext);
+                CleanupDisconnectedDevice(fdoContext);
+                return;
+            }
         }
-        else
-        {
-            TraceEvents(TRACE_LEVEL_WARNING, TRACE_DEVICE,
-                        __FUNCTION__": %s Device %p unplug detected by watchdog\n",
-                        fdoContext->FrontEndPath,
-                        fdoContext->WdfDevice);
+        ReleaseFdoLock(fdoContext);
 
-            FdoUnplugDevice(fdoContext);
-            ReleaseFdoLock(fdoContext);
-            return;
-        }
+        // restart the timer.
+        WdfTimerStart(Timer, WDF_REL_TIMEOUT_IN_SEC(1));
     }
-    ReleaseFdoLock(fdoContext);
-    //
-    // @todo run the dpc - if this fixes anything fix the bug!
-    //
-    if (!fdoContext->DeviceUnplugged)
-    {
-        FdoEvtDeviceDpcFunc(NULL, fdoContext, NULL, NULL);
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        TraceEvents(TRACE_LEVEL_ERROR, TRACE_DEVICE,
+            __FUNCTION__": Exception in fdoEvtTimerFunc\n");
     }
-#endif
 }
 
 /**
