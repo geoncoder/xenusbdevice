@@ -3031,6 +3031,14 @@ XenDpc(
 
         usbif_shadow_ex_t *shadow = &fdoContext->Xen->Shadows[response->id];
         ASSERT(shadow->Tag == SHADOW_TAG);
+
+        if (response->status == USBIF_RSP_USB_INVALID)
+        {
+            TraceEvents(TRACE_LEVEL_WARNING, TRACE_URB,
+                __FUNCTION__":Invalid response received from the backend\n");
+            continue;
+        }
+
         if (!shadow->InUse)
         {
             //
@@ -3153,14 +3161,6 @@ XenDpc(
             {
                 PURB Urb = URB_FROM_REQUEST(Request);
                 Urb->UrbHeader.Status = usbdStatus;
-
-                if (response->status == USBIF_RSP_USB_INVALID)
-                {
-                    //
-                    // debug this.
-                    //
-                    TraceUsbIfRequest(fdoContext, &shadow->req);
-                }
 
                 NtStatus = PostProcessUrb(
                                fdoContext,
